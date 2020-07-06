@@ -391,13 +391,12 @@ pxla.multi_host_supported_collectives.add(psum_p)
 # tracing time.
 @psum_p.def_custom_bind
 def psum_bind(*args, axis_name, **params):
-  if len(args) == 1 and not isinstance(args[0], core.Tracer):
-    x, = args
+  if all(not isinstance(x, core.Tracer) for x in args):
     if type(axis_name) is tuple:
       size = prod([core.axis_frame(name).size for name in axis_name])
     else:
       size = core.axis_frame(axis_name).size
-    return (size * x,)
+    return tuple(size * x for x in args)
   return core.Primitive.bind(psum_p, *args, axis_name=axis_name, **params)
 
 
